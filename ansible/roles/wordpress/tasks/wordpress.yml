@@ -1,0 +1,88 @@
+---
+
+- name: create database
+  mysql_db: name={{ wordpress_db_name }} state=present
+  register: db_exists
+  tags: wordpress
+
+- name: create database user
+  mysql_user: >
+    name={{ wordpress_db_user }}
+    password={{ wordpress_db_password }}
+    priv={{ wordpress_db_name }}.*:ALL
+    state=present
+  tags: wordpress
+
+- name: download WordPress
+  sudo: no
+  command: >
+    wp core download --locale=ja --path={{ document_root }}{{ wordpress_directory }}
+    chdir={{ document_root }}{{ wordpress_directory }}
+    creates={{ document_root }}{{ wordpress_directory }}/index.php
+  tags: wordpress
+
+- name: index.php copy from wordpress directory to document root
+  sudo: no
+  shell: >
+    cp {{ document_root }}{{ wordpress_directory }}/index.php {{ document_root }}/index.php
+    creates={{ document_root }}/index.php
+  tags: wordpress
+
+- name: index.php require path change
+  lineinfile: >
+    dest={{ document_root }}/index.php
+    state=present
+    regexp='wp-blog-header.php'
+    line="require( dirname( __FILE__ ) . '{{ wordpress_directory }}/wp-blog-header.php' );"
+  sudo: no
+  tags: wordpress
+
+- name: create wp-config.php
+  sudo: no
+  command: >
+    wp core config --dbname={{ wordpress_db_name }} --dbuser={{ wordpress_db_user }} --dbpass={{ wordpress_db_password }} --dbprefix={{ wordpress_db_prefix }} --locale=ja --path={{ document_root }}{{ wordpress_directory }} --skip-check
+    chdir={{ document_root }}{{ wordpress_directory }}
+    creates={{ document_root }}{{ wordpress_directory }}/wp-config.php
+  tags: wordpress
+
+- name: wp-config.php site address set
+  sudo: no
+  lineinfile: >
+    dest={{ document_root }}{{ wordpress_directory }}/wp-config.php
+    state=present
+    insertafter="^\$table_prefix"
+    line="define( 'WP_HOME', 'http://{{ ansible_fqdn }}' );"
+  tags: wordpress
+
+- name: wp-config.php wordpress directory set
+  sudo: no
+  lineinfile: >
+    dest={{ document_root }}{{ wordpress_directory }}/wp-config.php
+    state=present
+    insertafter="^\$table_prefix"
+    line="define( 'WP_SITEURL', 'http://{{ ansible_fqdn }}{{ wordpress_directory }}' );"
+  tags: wordpress
+
+- name: wp-config.php debug mode true
+  sudo: no
+  lineinfile: >
+    dest={{ document_root }}{{ wordpress_directory }}/wp-config.php
+    state=present
+    insertafter="^\$table_prefix"
+    line="define( 'WP_DEBUG', true );"
+  tags: wordpress
+
+- name: install WordPress
+  sudo: no
+  command: >
+    wp core install --url=http://{{ ansible_fqdn }} --title="{{ wordpress_site_name }}" --admin_user={{ wordpress_site_admin_user }} --admin_password={{ wordpress_site_admin_password }} --admin_email={{ wordpress_site_admin_email }}
+    chdir={{ document_root }}{{ wordpress_directory }}
+  when: db_exists|changed
+  tags: wordpress
+
+- name: update WordPress
+  sudo: no
+  command: >
+    wp core update --locale=ja
+    chdir={{ document_root }}{{ wordpress_directory }}
+  tags: wordpress

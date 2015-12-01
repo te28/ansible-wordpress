@@ -1,0 +1,5 @@
+ - name: install utility module
+   yum: name={{ item }} state=latest
+   with_items:
+     - vim
+     - git

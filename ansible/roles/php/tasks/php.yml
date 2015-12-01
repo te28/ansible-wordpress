@@ -1,0 +1,11 @@
+- name: install php packages
+  yum: name={{item}} state=latest
+  with_items:
+    - php
+    - php-devel
+    - php-mbstring
+    - php-mysql
+  notify:
+    - restart apache
+  tags: php
+

@@ -1,0 +1,74 @@
+- name: install ruby require modules
+  yum: name={{ item }} state=latest
+  sudo: yes
+  with_items:
+    - wget
+    - gcc
+    - gcc-c++
+    - make
+    - openssl-devel
+    - zlib-devel
+    - readline-devel
+    - sqlite-devel
+  tags: ruby
+
+- name: clone rbenv repo
+  sudo: no
+  git: repo=https://github.com/sstephenson/rbenv.git dest=/home/vagrant/.rbenv
+  tags: ruby
+
+- name: add rbenv initialization to profile
+  copy: >
+    src=rbenv.sh
+    dest=/etc/profile.d/rbenv.sh
+    owner=vagrant
+    group=vagrant
+    mode=0755
+  tags: ruby
+
+- name: check ruby-build installed
+  command: test -x /usr/local/bin/ruby-build
+  register: rbuild_present
+  ignore_errors: yes
+  tags: ruby
+
+- name: clone ruby-build repo
+  sudo: no
+  git: repo=https://github.com/sstephenson/ruby-build.git dest=/home/vagrant/plugins/ruby-build
+  when: rbuild_present|failed
+  tags: ruby
+
+- name: install ruby-build
+  command: ./install.sh chdir=/home/vagrant/plugins/ruby-build
+  when: rbuild_present|failed
+  tags: ruby
+
+- name: check ruby installed
+  sudo: no
+  shell: rbenv versions | grep 2.1.5
+  register: ruby_installed
+  ignore_errors: yes
+  tags: ruby
+
+- name: install ruby
+  sudo: no
+  shell: rbenv install 2.1.5
+  when: ruby_installed|failed
+  tags: ruby
+
+- name: set global ruby
+  sudo: no
+  shell: rbenv global 2.1.5
+  when: ruby_installed|failed
+  tags: ruby
+
+- name: rehash
+  sudo: no
+  shell: rbenv rehash
+  when: ruby_installed|failed
+  tags: ruby
+
+- name: install bundler
+  command: gem install bundler
+  sudo: no
+  tags: ruby

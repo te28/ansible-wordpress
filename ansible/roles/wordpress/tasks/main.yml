@@ -1,0 +1,4 @@
+---
+- include: wpcli.yml
+- include: wordpress.yml
+- include: wordmove.yml
