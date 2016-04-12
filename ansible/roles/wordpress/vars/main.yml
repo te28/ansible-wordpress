@@ -31,4 +31,4 @@ wordpress_site_admin_user: 'admin'
 # wordpressの管理ユーザーパスワード
 wordpress_site_admin_password: 'admin'
 # wordpressの管理ユーザーメールアドレス
-wordpress_site_admin_email: 'xxxx@ingsnet.co.jp'
+wordpress_site_admin_email: 'xxxx@xxx.co.jp'
