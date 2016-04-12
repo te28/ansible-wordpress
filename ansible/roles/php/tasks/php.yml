@@ -1,5 +1,5 @@
 - name: install php packages
-  yum: name={{item}} state=latest
+  yum: name={{item}} state=latest enablerepo=remi
   with_items:
     - php
     - php-devel

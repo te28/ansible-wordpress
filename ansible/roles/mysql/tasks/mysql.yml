@@ -1,5 +1,5 @@
 - name: install mysql
-  yum: name={{item}} state=latest
+  yum: name={{item}} state=latest enablerepo=remi
   with_items:
     - mysql-server
     - MySQL-python

@@ -1,6 +1,6 @@
 ---
 - name: Install wordmove
-  sudo: no
+  become: no
   gem: name=wordmove state=latest
   tags: wordmove
 
@@ -15,13 +15,4 @@
   command: >
     mv /home/vagrant/Movefile /vagrant/Movefile
     creates=/vagrant/Movefile
-  tags: wordmove
-
-- name: wordpress owner change
-  sudo: yes
-  file: >
-    dest={{ document_root }}
-    owner=apache
-    group=apache
-    recurse=yes
   tags: wordmove

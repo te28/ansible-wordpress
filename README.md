@@ -24,49 +24,92 @@ wordpressのコマンドラインインターフェース
 
 ```
 .
-├── README.md
-├── Vagrantfile
-└── ansible
-    ├── ansible.cfg // ansible全般の設定を記述
-    ├── common.yml // roles/commonを呼び出すplaybook
-    ├── site.yml // common.yml,wordpress.ymlを呼び出すplaybook
-    ├── wordpress.yml // roles/wordpressを呼び出すplaybook
-    ├── group_vars
-    │   └── all.yml // playbook内で使用する変数を記載
-    ├── host_vars
-    ├── local // インベントリファイル どのサーバーを管理するのか記述
-    └── roles
-    │   ├── common // LAMP環境の構築
-    │   │   ├── defaults
-    │   │   ├── files
-    │   │   │   └── rbenv.sh
-    │   │   ├── handlers
-    │   │   │   └── main.yml
-    │   │   ├── meta
-    │   │   ├── tasks
-    │   │   │   ├── ansible.yml
-    │   │   │   ├── apache.yml
-    │   │   │   ├── main.yml
-    │   │   │   ├── mysql.yml
-    │   │   │   ├── php.yml
-    │   │   │   ├── ruby.yml
-    │   │   │   └── utility.yml
-    │   │   ├── templates
-    │   │   └── vars
-    │   └── wordpress // wordpress環境の構築
-    │       ├── defaults
-    │       ├── files
-    │       ├── handlers
-    │       ├── meta
-    │       ├── tasks
-    │       │   ├── main.yml
-    │       │   ├── wordpress.yml
-    │       │   └── wpcli.yml
-    │       ├── templates
-    │       └── vars
-    │           └── main.yml
-    └── html // 仮想環境のドキュメントルート以下が同期されます。
-
+├── README.md // 当ファイル
+├── Vagrantfile // vagrantのプログラム
+├── ansible // ansibleのタスク群
+│   ├── ansible.cfg // ansible全般の設定を記述
+│   ├── host_vars
+│   ├── hosts // インベントリファイル どのサーバーを管理するのか記述
+│   ├── roles
+│   │   ├── common // 環境構築に必要なパッケージを設定
+│   │   │   ├── defaults
+│   │   │   ├── files
+│   │   │   ├── handlers
+│   │   │   │   └── main.yml
+│   │   │   ├── meta
+│   │   │   ├── tasks
+│   │   │   │   ├── ansible.yml
+│   │   │   │   ├── main.yml
+│   │   │   │   ├── utility.yml
+│   │   │   │   └── yum_repos.yml
+│   │   │   ├── templates
+│   │   │   └── vars
+│   │   ├── httpd // apacheの設定
+│   │   │   ├── defaults
+│   │   │   ├── files
+│   │   │   ├── handlers
+│   │   │   │   └── main.yml
+│   │   │   ├── meta
+│   │   │   ├── tasks
+│   │   │   │   ├── apache.yml
+│   │   │   │   └── main.yml
+│   │   │   ├── templates
+│   │   │   │   └── vhost.conf.j2
+│   │   │   └── vars
+│   │   ├── mysql // mysqlの設定
+│   │   │   ├── defaults
+│   │   │   ├── files
+│   │   │   ├── handlers
+│   │   │   ├── meta
+│   │   │   ├── tasks
+│   │   │   │   ├── main.yml
+│   │   │   │   └── mysql.yml
+│   │   │   ├── templates
+│   │   │   └── vars
+│   │   ├── php // phpの設定
+│   │   │   ├── defaults
+│   │   │   ├── files
+│   │   │   ├── handlers
+│   │   │   │   └── main.yml
+│   │   │   ├── meta
+│   │   │   ├── tasks
+│   │   │   │   ├── main.yml
+│   │   │   │   └── php.yml
+│   │   │   ├── templates
+│   │   │   └── vars
+│   │   ├── ruby // rubyの設定
+│   │   │   ├── defaults
+│   │   │   ├── files
+│   │   │   │   └── rbenv.sh
+│   │   │   ├── handlers
+│   │   │   │   └── main.yml
+│   │   │   ├── meta
+│   │   │   ├── tasks
+│   │   │   │   ├── main.yml
+│   │   │   │   └── ruby.yml
+│   │   │   ├── templates
+│   │   │   └── vars
+│   │   └── wordpress // wordpressの設定
+│   │       ├── defaults
+│   │       ├── files
+│   │       ├── handlers
+│   │       ├── tasks
+│   │       │   ├── config.yml
+│   │       │   ├── copy_and_edit_index_php.yml
+│   │       │   ├── create_database.yml
+│   │       │   ├── download.yml
+│   │       │   ├── install.yml
+│   │       │   ├── main.yml
+│   │       │   ├── update.yml
+│   │       │   ├── wordmove.yml
+│   │       │   └── wpcli.yml
+│   │       ├── templates
+│   │       │   ├── movefile.j2
+│   │       │   └── wp-config.php
+│   │       └── vars
+│   │           └── main.yml
+│   └── site.yml
+└── html // 仮想環境のドキュメントルート以下が同期されます。
 ```
 
 ## 環境
@@ -101,7 +144,7 @@ $ pip install ansible
 
 ```
 $ cd ~/hoge
-$ git clone https://192.168.1.201/git/house-projects.wordpress-ansible
+$ git clone https://github.com/te28/ansible-wordpress
 ```
 
 ### 設定ファイルの編集
@@ -112,7 +155,7 @@ $ git clone https://192.168.1.201/git/house-projects.wordpress-ansible
 config.vm.network "private_network", ip: "192.168.33.51"
 ```
 
-`local`を開き、上記で設定した`ipアドレス`を入力してください。
+`hosts`を開き、上記で設定した`ipアドレス`を入力してください。
 
 ```
 [local]

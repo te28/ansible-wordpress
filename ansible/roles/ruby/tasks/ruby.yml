@@ -1,6 +1,6 @@
 - name: install ruby require modules
   yum: name={{ item }} state=latest
-  sudo: yes
+  become: yes
   with_items:
     - wget
     - gcc
@@ -13,7 +13,7 @@
   tags: ruby
 
 - name: clone rbenv repo
-  sudo: no
+  become: no
   git: repo=https://github.com/sstephenson/rbenv.git dest=/home/vagrant/.rbenv
   tags: ruby
 
@@ -33,7 +33,7 @@
   tags: ruby
 
 - name: clone ruby-build repo
-  sudo: no
+  become: no
   git: repo=https://github.com/sstephenson/ruby-build.git dest=/home/vagrant/plugins/ruby-build
   when: rbuild_present|failed
   tags: ruby
@@ -44,31 +44,31 @@
   tags: ruby
 
 - name: check ruby installed
-  sudo: no
+  become: no
   shell: rbenv versions | grep 2.1.5
   register: ruby_installed
   ignore_errors: yes
   tags: ruby
 
 - name: install ruby
-  sudo: no
+  become: no
   shell: rbenv install 2.1.5
   when: ruby_installed|failed
   tags: ruby
 
 - name: set global ruby
-  sudo: no
+  become: no
   shell: rbenv global 2.1.5
   when: ruby_installed|failed
   tags: ruby
 
 - name: rehash
-  sudo: no
+  become: no
   shell: rbenv rehash
   when: ruby_installed|failed
   tags: ruby
 
 - name: install bundler
   command: gem install bundler
-  sudo: no
+  become: no
   tags: ruby
